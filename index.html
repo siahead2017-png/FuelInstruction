@@ -121,14 +121,29 @@ function parseCsv(text) {
   return rows.filter(r => r.length && r.some(c => c !== ''));
 }
 
-// Умная функция: если isNumbered = true, ставит цифры, иначе - точки
+// Умная функция: отделяет первую строку (абзац) от списка заправок
 function linesToList(str, isNumbered = false) {
   const lines = String(str).split('\n').map(s => s.trim()).filter(Boolean);
+  if (lines.length === 0) return '';
+
   if (isNumbered) {
-    return '<ol style="margin: 0; padding-left: 24px; list-style-type: decimal;">' 
-         + lines.map(s => `<li>${escapeHtml(s)}</li>`).join('') 
-         + '</ol>';
+    // Берем первую строчку как заголовок/абзац
+    const firstLine = escapeHtml(lines[0]);
+    // Всё остальное пойдет в список
+    const restLines = lines.slice(1);
+    
+    // Формируем абзац с отступом вниз (margin-bottom: 12px)
+    let html = `<p style="margin: 0 0 12px 0;"><strong>${firstLine}</strong></p>`;
+    
+    // Формируем нумерованный список
+    if (restLines.length > 0) {
+      html += '<ol style="margin: 0; padding-left: 24px; list-style-type: decimal;">' 
+           + restLines.map(s => `<li>${escapeHtml(s)}</li>`).join('') 
+           + '</ol>';
+    }
+    return html;
   } else {
+    // Для всех остальных карточек оставляем обычные точки
     return '<ul style="margin: 0; padding-left: 16px; list-style-type: disc;">' 
          + lines.map(s => `<li>${escapeHtml(s)}</li>`).join('') 
          + '</ul>';
@@ -178,7 +193,6 @@ function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType) {
 
   let inner = '';
   if (cardType === 'diesel') {
-    // Включаем цифры (true) только для блока DIESEL
     inner = buildSection('', rules, true); 
   } else if (cardType === 'extra') {
     inner = buildSection('', rules, false);
@@ -248,7 +262,7 @@ async function load() {
 
   } catch (e) {
     document.getElementById('acc').innerHTML =
-      '<div class="status">Не удалось загрузить инструкцию. Убедитесь, что интернет работает.</div>';
+      '<div class="status">Не удалось загрузить инструкцию. Проверьте интернет и обновите страницу.</div>';
     console.error(e);
   }
 }
