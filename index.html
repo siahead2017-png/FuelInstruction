@@ -129,9 +129,10 @@ function parseCsv(text) {
   return rows.filter(r => r.length && r.some(c => c !== ''));
 }
 
+// ОБНОВЛЕННАЯ ФУНКЦИЯ (с автоматической нумерацией)
 function linesToList(str) {
   const lines = String(str).split('\n').map(s => s.trim()).filter(Boolean);
-  return '<ul>' + lines.map(s => `<li>${escapeHtml(s)}</li>`).join('') + '</ul>';
+  return '<ol style="margin: 0; padding-left: 24px;">' + lines.map(s => `<li>${escapeHtml(s)}</li>`).join('') + '</ol>';
 }
 
 function buildSection(label, content) {
@@ -159,7 +160,7 @@ function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType) {
   if (cardType === 'extra') {
     numHtml = `<div class="num warn">&#9888;</div>`;
   } else if (cardType === 'diesel') {
-    numHtml = `<div class="num diesel-icon">⛽</div>`; // Иконка заправки
+    numHtml = `<div class="num diesel-icon">⛽</div>`;
   }
 
   const btn = document.createElement('button');
@@ -213,13 +214,11 @@ async function load() {
     const metaRows = parseCsv(metaText);
     const date = metaRows[0] ? metaRows[0][1] : '';
     
-    // 1. Извлекаем "Дополнительные правила" (строка 2, ячейка B)
     let extraRules = metaRows[1] ? metaRows[1][1] : '';
     if (!extraRules || extraRules.trim() === '') {
       extraRules = 'Дополнительные правила отсутствуют.';
     }
 
-    // 2. Извлекаем цены на DIESEL (строка 3, ячейка B)
     let dieselPrices = metaRows[2] ? metaRows[2][1] : '';
     if (!dieselPrices || dieselPrices.trim() === '') {
       dieselPrices = 'Цены пока не загружены.';
@@ -230,13 +229,9 @@ async function load() {
     const acc = document.getElementById('acc');
     acc.innerHTML = '';
 
-    // Кнопка 1: Дополнительные правила
     acc.appendChild(buildBlockEl(null, 'Дополнительные правила', 'Нажмите, чтобы посмотреть', '', '', extraRules, 'extra'));
-
-    // Кнопка 2: Цены на DIESEL
     acc.appendChild(buildBlockEl(null, 'Самые Выгодные цены на DIESEL', 'Нажмите, чтобы посмотреть', '', '', dieselPrices, 'diesel'));
 
-    // Все остальные блоки (обычные заправки)
     const blockRows = parseCsv(blocksText);
     blockRows.shift();
     
@@ -252,6 +247,3 @@ async function load() {
   }
 }
 load();
-</script>
-</body>
-</html>
