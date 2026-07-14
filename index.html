@@ -9,6 +9,19 @@
 <meta name="apple-mobile-web-app-title" content="Заправки">
 <meta name="theme-color" content="#1c6e56">
 <title>Инструкция по заправкам</title>
+
+<!-- ИКОНКА В СТРОКЕ БРАУЗЕРА -->
+<link rel="icon" type="image/png" href="favicon.png">
+
+<!-- КРАСИВОЕ ПРЕВЬЮ ПРИ ОТПРАВКЕ ССЫЛКИ -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://siahead2017-png.github.io/FuelInstruction/">
+<meta property="og:title" content="Инструкция по заправкам — SIA HEAD, HDLG">
+<meta property="og:description" content="Официальное руководство по заправкам и правила работы с топливными картами для водителей.">
+<meta property="og:image" content="https://siahead2017-png.github.io/FuelInstruction/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
@@ -121,21 +134,16 @@ function parseCsv(text) {
   return rows.filter(r => r.length && r.some(c => c !== ''));
 }
 
-// Умная функция: отделяет первую строку (абзац) от списка заправок
 function linesToList(str, isNumbered = false) {
   const lines = String(str).split('\n').map(s => s.trim()).filter(Boolean);
   if (lines.length === 0) return '';
 
   if (isNumbered) {
-    // Берем первую строчку как заголовок/абзац
     const firstLine = escapeHtml(lines[0]);
-    // Всё остальное пойдет в список
     const restLines = lines.slice(1);
     
-    // Формируем абзац с отступом вниз (margin-bottom: 12px)
     let html = `<p style="margin: 0 0 12px 0;"><strong>${firstLine}</strong></p>`;
     
-    // Формируем нумерованный список
     if (restLines.length > 0) {
       html += '<ol style="margin: 0; padding-left: 24px; list-style-type: decimal;">' 
            + restLines.map(s => `<li>${escapeHtml(s)}</li>`).join('') 
@@ -143,7 +151,6 @@ function linesToList(str, isNumbered = false) {
     }
     return html;
   } else {
-    // Для всех остальных карточек оставляем обычные точки
     return '<ul style="margin: 0; padding-left: 16px; list-style-type: disc;">' 
          + lines.map(s => `<li>${escapeHtml(s)}</li>`).join('') 
          + '</ul>';
