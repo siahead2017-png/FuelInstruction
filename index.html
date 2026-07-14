@@ -28,15 +28,13 @@
     background: #fbeae7; color: #712b13; border-radius: 10px;
     padding: 10px 12px; font-size: 13px; margin-bottom: 16px;
   }
-  .extra-card {
-    background: #fff8e6; border: 1px solid #f0d38a; border-radius: 12px;
-    padding: 14px; margin-bottom: 18px;
-  }
-  .extra-card h2 { font-size: 14px; margin: 0 0 6px; color: #6b4c02; }
-  .extra-card .body { font-size: 13px; line-height: 1.6; color: #4a3901; }
   .card {
     background: #ffffff; border: 1px solid #e4e2d9; border-radius: 12px;
     margin-bottom: 8px; overflow: hidden;
+  }
+  /* Особый стиль для карточки доп. правил */
+  .card.extra {
+    background: #fff8e6; border-color: #f0d38a;
   }
   .card-head {
     width: 100%; display: flex; align-items: center; gap: 10px;
@@ -48,6 +46,7 @@
     color: #0c447c; display:flex; align-items:center; justify-content:center;
     font-size: 13px; font-weight: 600; flex-shrink: 0;
   }
+  .num.warn { background: #fbeae7; color: #b3401f; font-size: 16px; }
   .head-text { flex: 1; min-width: 0; }
   .title { font-size: 14px; font-weight: 600; margin: 0; }
   .subtitle {
@@ -60,6 +59,7 @@
     padding: 0 14px 14px 56px; font-size: 13px; line-height: 1.6;
     border-top: 1px solid #eeece4; padding-top: 10px; margin-top: 2px;
   }
+  .card.extra .card-body-inner { border-top-color: #f0d38a; }
   .card.open .chev { transform: rotate(180deg); }
   .status { font-size: 13px; color: #6b6a65; padding: 20px 0; text-align: center; }
 
@@ -85,16 +85,11 @@
 
   <div class="banner">Внимание, в инструкции есть изменения. Выберите нужный блок ниже.</div>
 
-  <div class="extra-card">
-    <h2>Дополнительные правила</h2>
-    <div class="body" id="extraRules"></div>
-  </div>
-
   <div id="acc"><div class="status">Загрузка…</div></div>
 
 <script>
 /* =====================================================================
-   1) Вставьте сюда две ссылки "Опубликовать в интернете" (см. инструкцию)
+   1) Ссылки "Опубликовать в интернете"
    ===================================================================== */
 const META_CSV_URL   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIb_CZuKwVFJfrY9KMPb24idCfhUq5eLq4E8prXR_-wOQTvz93aAxraiS-ZcEWmEGi3RFAibQtOSNO/pub?gid=1707662453&single=true&output=csv';
 const BLOCKS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIb_CZuKwVFJfrY9KMPb24idCfhUq5eLq4E8prXR_-wOQTvz93aAxraiS-ZcEWmEGi3RFAibQtOSNO/pub?gid=772559255&single=true&output=csv';
@@ -104,9 +99,8 @@ function escapeHtml(str) {
   if (str === null || str === undefined) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
-function nl2br(str) { return String(str).replace(/\n/g, '<br>'); }
 
-// простой, но надёжный CSV-парсер (поддерживает кавычки, запятые и переносы строк внутри ячеек)
+// простой, но надёжный CSV-парсер
 function parseCsv(text) {
   const rows = [];
   let row = [], field = '', inQuotes = false;
@@ -135,43 +129,61 @@ function linesToList(str) {
 
 function buildSection(label, content) {
   if (!content || !content.trim()) return '';
+  const labelHtml = label ? `<p class="section-label">${label}</p>` : '';
   return `
     <div class="section">
-      <p class="section-label">${label}</p>
+      ${labelHtml}
       <div class="section-body">${linesToList(content)}</div>
     </div>`;
 }
 
-function buildBlockEl(n, title, subtitle, main, reserve, rules) {
+// Функция сборки карточки (работает как для обычных блоков, так и для Доп. правил)
+function buildBlockEl(n, title, subtitle, main, reserve, rules, isExtra) {
   const item = document.createElement('div');
-  item.className = 'card';
+  item.className = isExtra ? 'card extra' : 'card';
+
+  const numHtml = isExtra 
+    ? `<div class="num warn">&#9888;</div>` 
+    : `<div class="num">${n}</div>`;
+
   const btn = document.createElement('button');
   btn.className = 'card-head';
   btn.innerHTML = `
-    <div class="num">${n}</div>
+    ${numHtml}
     <div class="head-text">
       <p class="title">${escapeHtml(title)}</p>
       <p class="subtitle">${escapeHtml(subtitle)}</p>
     </div>
     <div class="chev">&#9662;</div>`;
+
   const bodyEl = document.createElement('div');
   bodyEl.className = 'card-body';
-  const inner =
-    buildSection('Основная:', main) +
-    buildSection('Резервная:', reserve) +
-    buildSection('Доп. правила:', rules);
+
+  const inner = isExtra 
+    ? buildSection('', rules) // для доп. правил убираем заголовок "Правила:" внутри карточки
+    : (buildSection('Основная:', main) +
+       buildSection('Резервная:', reserve) +
+       buildSection('Доп. правила:', rules));
+
   bodyEl.innerHTML = `<div class="card-body-inner">${inner}</div>`;
+
   btn.onclick = () => {
     const isOpen = item.classList.contains('open');
+    
+    // Сворачиваем все карточки
     document.querySelectorAll('.card').forEach(c => {
       c.classList.remove('open');
       c.querySelector('.card-body').style.maxHeight = '0px';
     });
+    
+    // Открываем текущую
     if (!isOpen) {
       item.classList.add('open');
-      bodyEl.style.maxHeight = bodyEl.scrollHeight + 20 + 'px';
+      const innerContainer = bodyEl.querySelector('.card-body-inner');
+      bodyEl.style.maxHeight = innerContainer.scrollHeight + 15 + 'px';
     }
   };
+
   item.appendChild(btn);
   item.appendChild(bodyEl);
   return item;
@@ -186,19 +198,28 @@ async function load() {
 
     const metaRows = parseCsv(metaText);
     const date = metaRows[0] ? metaRows[0][1] : '';
-    const extraRules = metaRows[1] ? metaRows[1][1] : '';
+    let extraRules = metaRows[1] ? metaRows[1][1] : '';
+    if (!extraRules || extraRules.trim() === '') {
+      extraRules = 'Дополнительные правила отсутствуют.';
+    }
 
     document.getElementById('dateLine').textContent = 'Действует с ' + date;
-    document.getElementById('extraRules').innerHTML = nl2br(escapeHtml(extraRules));
 
-    const blockRows = parseCsv(blocksText);
-    blockRows.shift(); // убираем строку заголовков
     const acc = document.getElementById('acc');
     acc.innerHTML = '';
+
+    // 1. Сначала добавляем раскрывающуюся карточку "Дополнительные правила" в самое начало
+    acc.appendChild(buildBlockEl(null, 'Дополнительные правила', 'Нажмите, чтобы посмотреть', '', '', extraRules, true));
+
+    // 2. Затем добавляем все остальные блоки из вкладки Blocks
+    const blockRows = parseCsv(blocksText);
+    blockRows.shift(); // убираем строку заголовков
+    
     blockRows.forEach((r, i) => {
       if (!r[0]) return;
-      acc.appendChild(buildBlockEl(i + 1, r[0], r[1], r[2], r[3], r[4]));
+      acc.appendChild(buildBlockEl(i + 1, r[0], r[1], r[2], r[3], r[4], false));
     });
+
   } catch (e) {
     document.getElementById('acc').innerHTML =
       '<div class="status">Не удалось загрузить инструкцию. Проверьте интернет и обновите страницу.</div>';
