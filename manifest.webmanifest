@@ -1,6 +1,6 @@
 {
   "name": "DIESEL Инструкция (HEAD, HDLG)",
-  "short_name": "DIESEL Инструкция (HEAD, HDLG)",
+  "short_name": "HEAD,HDLG Заправки",
   "description": "Официальное руководство по заправкам и правила работы с топливными картами для водителей.",
   "start_url": "./",
   "scope": "./",
