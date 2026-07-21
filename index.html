@@ -14,6 +14,13 @@
      иначе браузер покажет старую иконку из своего кеша. -->
 <link rel="icon" type="image/png" href="favicon.png?v=1">
 
+<!-- ИКОНКА ПРИ ДОБАВЛЕНИИ НА ГЛАВНЫЙ ЭКРАН (Android/iOS).
+     Без manifest.webmanifest и apple-touch-icon телефон подставляет
+     свою иконку по умолчанию вместо лого. При замене icon-*.png
+     меняй ?v= и здесь, и в manifest.webmanifest. -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png?v=1">
+
 <!-- КРАСИВОЕ ПРЕВЬЮ ПРИ ОТПРАВКЕ ССЫЛКИ -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://siahead2017-png.github.io/FuelInstruction/">
