@@ -96,6 +96,12 @@
     font-size: 12px; font-weight: 700; margin: 0 0 4px; color: #1f1f1d;
   }
   .section-body { font-size: 13px; line-height: 1.6; }
+
+  .stamp {
+    font-size: 12px; color: #166534; font-weight: 600;
+    margin: 0 0 10px; padding: 6px 10px;
+    background: #dcfce7; border-radius: 8px; display: inline-block;
+  }
 </style>
 </head>
 <body>
@@ -103,7 +109,7 @@
   <div class="header">
     <div>
       <h1>Инструкция по заправкам</h1>
-      <p id="dateLine">Действует с …</p>
+      <p id="dateLine">Цены обновлены: …</p>
     </div>
     <div class="badge">&#9888;</div>
   </div>
@@ -175,7 +181,7 @@ function buildSection(label, content, isNumbered = false) {
     </div>`;
 }
 
-function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType) {
+function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType, stamp = '') {
   const item = document.createElement('div');
   
   if (cardType === 'extra') {
@@ -208,7 +214,8 @@ function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType) {
 
   let inner = '';
   if (cardType === 'diesel') {
-    inner = buildSection('', rules, true); 
+    const stampHtml = stamp ? `<p class="stamp">Актуально на: ${escapeHtml(stamp)}</p>` : '';
+    inner = stampHtml + buildSection('', rules, true);
   } else if (cardType === 'extra') {
     inner = buildSection('', rules, false);
   } else {
@@ -259,13 +266,13 @@ async function load() {
       dieselPrices = 'Цены пока не загружены.';
     }
 
-    document.getElementById('dateLine').textContent = 'Действует с ' + date;
+    document.getElementById('dateLine').textContent = 'Цены обновлены: ' + date;
 
     const acc = document.getElementById('acc');
     acc.innerHTML = '';
 
     acc.appendChild(buildBlockEl(null, 'Дополнительные правила', 'Нажмите, чтобы посмотреть', '', '', extraRules, 'extra'));
-    acc.appendChild(buildBlockEl(null, 'Самые Выгодные цены на DIESEL', 'Нажмите, чтобы посмотреть', '', '', dieselPrices, 'diesel'));
+    acc.appendChild(buildBlockEl(null, 'Самые Выгодные цены на DIESEL', 'Нажмите, чтобы посмотреть', '', '', dieselPrices, 'diesel', date));
 
     const blockRows = parseCsv(blocksText);
     blockRows.shift();
