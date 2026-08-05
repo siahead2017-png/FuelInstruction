@@ -59,6 +59,9 @@
   .card.diesel {
     background: #f0fdf4; border-color: #bbf7d0;
   }
+  .card.adblue {
+    background: #eaf3fb; border-color: #bcdcf5;
+  }
   .card-head {
     width: 100%; display: flex; align-items: center; gap: 10px;
     padding: 12px 14px; background: transparent; border: none; text-align: left;
@@ -71,6 +74,7 @@
   }
   .num.warn { background: #fbeae7; color: #b3401f; font-size: 16px; }
   .num.diesel-icon { background: #dcfce7; color: #166534; font-size: 16px; }
+  .num.adblue-icon { background: #cfe6fa; color: #0c447c; font-size: 16px; }
   
   .head-text { flex: 1; min-width: 0; }
   .title { font-size: 14px; font-weight: 600; margin: 0; }
@@ -86,6 +90,7 @@
   }
   .card.extra .card-body-inner { border-top-color: #f0d38a; }
   .card.diesel .card-body-inner { border-top-color: #bbf7d0; }
+  .card.adblue .card-body-inner { border-top-color: #bcdcf5; }
   
   .card.open .chev { transform: rotate(180deg); }
   .status { font-size: 13px; color: #6b6a65; padding: 20px 0; text-align: center; }
@@ -102,6 +107,7 @@
     margin: 0 0 10px; padding: 6px 10px;
     background: #dcfce7; border-radius: 8px; display: inline-block;
   }
+  .stamp.adblue { background: #cfe6fa; color: #0c447c; }
 </style>
 </head>
 <body>
@@ -148,19 +154,20 @@ function parseCsv(text) {
   return rows.filter(r => r.length && r.some(c => c !== ''));
 }
 
-function linesToList(str, isNumbered = false) {
+function linesToList(str, isNumbered = false, hideMarker = false) {
   const lines = String(str).split('\n').map(s => s.trim()).filter(Boolean);
   if (lines.length === 0) return '';
 
   if (isNumbered) {
     const firstLine = escapeHtml(lines[0]);
     const restLines = lines.slice(1);
-    
+
     let html = `<p style="margin: 0 0 12px 0;"><strong>${firstLine}</strong></p>`;
-    
+
     if (restLines.length > 0) {
-      html += '<ol style="margin: 0; padding-left: 24px; list-style-type: decimal;">' 
-           + restLines.map(s => `<li>${escapeHtml(s)}</li>`).join('') 
+      const listStyle = hideMarker ? 'list-style-type: none;' : 'list-style-type: decimal;';
+      html += `<ol style="margin: 0; padding-left: 24px; ${listStyle}">`
+           + restLines.map(s => `<li>${escapeHtml(s)}</li>`).join('')
            + '</ol>';
     }
     return html;
@@ -171,13 +178,13 @@ function linesToList(str, isNumbered = false) {
   }
 }
 
-function buildSection(label, content, isNumbered = false) {
+function buildSection(label, content, isNumbered = false, hideMarker = false) {
   if (!content || !content.trim()) return '';
   const labelHtml = label ? `<p class="section-label">${label}</p>` : '';
   return `
     <div class="section">
       ${labelHtml}
-      <div class="section-body">${linesToList(content, isNumbered)}</div>
+      <div class="section-body">${linesToList(content, isNumbered, hideMarker)}</div>
     </div>`;
 }
 
@@ -188,6 +195,8 @@ function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType, stamp 
     item.className = 'card extra';
   } else if (cardType === 'diesel') {
     item.className = 'card diesel';
+  } else if (cardType === 'adblue') {
+    item.className = 'card adblue';
   } else {
     item.className = 'card';
   }
@@ -197,6 +206,8 @@ function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType, stamp 
     numHtml = `<div class="num warn">&#9888;</div>`;
   } else if (cardType === 'diesel') {
     numHtml = `<div class="num diesel-icon">⛽</div>`;
+  } else if (cardType === 'adblue') {
+    numHtml = `<div class="num adblue-icon">💧</div>`;
   }
 
   const btn = document.createElement('button');
@@ -213,9 +224,12 @@ function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType, stamp 
   bodyEl.className = 'card-body';
 
   let inner = '';
-  if (cardType === 'diesel') {
-    const stampHtml = stamp ? `<p class="stamp">Актуально на: ${escapeHtml(stamp)}</p>` : '';
-    inner = stampHtml + buildSection('', rules, true);
+  if (cardType === 'diesel' || cardType === 'adblue') {
+    const stampClass = cardType === 'adblue' ? 'stamp adblue' : 'stamp';
+    const stampHtml = stamp ? `<p class="${stampClass}">Актуально на: ${escapeHtml(stamp)}</p>` : '';
+    // ADBLUE-строки уже пронумерованы вручную в самой таблице ("1) ..."),
+    // поэтому свой счётчик <ol> тут не нужен — иначе выйдет "1. 1) ...".
+    inner = stampHtml + buildSection('', rules, true, cardType === 'adblue');
   } else if (cardType === 'extra') {
     inner = buildSection('', rules, false);
   } else {
@@ -266,6 +280,11 @@ async function load() {
       dieselPrices = 'Цены пока не загружены.';
     }
 
+    let adbluePrices = metaRows[3] ? metaRows[3][1] : '';
+    if (!adbluePrices || adbluePrices.trim() === '') {
+      adbluePrices = 'Цены пока не загружены.';
+    }
+
     document.getElementById('dateLine').textContent = 'Цены обновлены: ' + date;
 
     const acc = document.getElementById('acc');
@@ -273,6 +292,7 @@ async function load() {
 
     acc.appendChild(buildBlockEl(null, 'Дополнительные правила', 'Нажмите, чтобы посмотреть', '', '', extraRules, 'extra'));
     acc.appendChild(buildBlockEl(null, 'Самые Выгодные цены на DIESEL', 'Нажмите, чтобы посмотреть', '', '', dieselPrices, 'diesel', date));
+    acc.appendChild(buildBlockEl(null, 'Самые Выгодные цены на ADBLUE', 'Нажмите, чтобы посмотреть', '', '', adbluePrices, 'adblue', date));
 
     const blockRows = parseCsv(blocksText);
     blockRows.shift();
