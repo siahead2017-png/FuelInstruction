@@ -154,7 +154,7 @@ function parseCsv(text) {
   return rows.filter(r => r.length && r.some(c => c !== ''));
 }
 
-function linesToList(str, isNumbered = false, hideMarker = false) {
+function linesToList(str, isNumbered = false) {
   const lines = String(str).split('\n').map(s => s.trim()).filter(Boolean);
   if (lines.length === 0) return '';
 
@@ -165,8 +165,7 @@ function linesToList(str, isNumbered = false, hideMarker = false) {
     let html = `<p style="margin: 0 0 12px 0;"><strong>${firstLine}</strong></p>`;
 
     if (restLines.length > 0) {
-      const listStyle = hideMarker ? 'list-style-type: none;' : 'list-style-type: decimal;';
-      html += `<ol style="margin: 0; padding-left: 24px; ${listStyle}">`
+      html += '<ol style="margin: 0; padding-left: 24px; list-style-type: decimal;">'
            + restLines.map(s => `<li>${escapeHtml(s)}</li>`).join('')
            + '</ol>';
     }
@@ -178,13 +177,13 @@ function linesToList(str, isNumbered = false, hideMarker = false) {
   }
 }
 
-function buildSection(label, content, isNumbered = false, hideMarker = false) {
+function buildSection(label, content, isNumbered = false) {
   if (!content || !content.trim()) return '';
   const labelHtml = label ? `<p class="section-label">${label}</p>` : '';
   return `
     <div class="section">
       ${labelHtml}
-      <div class="section-body">${linesToList(content, isNumbered, hideMarker)}</div>
+      <div class="section-body">${linesToList(content, isNumbered)}</div>
     </div>`;
 }
 
@@ -227,9 +226,7 @@ function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType, stamp 
   if (cardType === 'diesel' || cardType === 'adblue') {
     const stampClass = cardType === 'adblue' ? 'stamp adblue' : 'stamp';
     const stampHtml = stamp ? `<p class="${stampClass}">Актуально на: ${escapeHtml(stamp)}</p>` : '';
-    // ADBLUE-строки уже пронумерованы вручную в самой таблице ("1) ..."),
-    // поэтому свой счётчик <ol> тут не нужен — иначе выйдет "1. 1) ...".
-    inner = stampHtml + buildSection('', rules, true, cardType === 'adblue');
+    inner = stampHtml + buildSection('', rules, true);
   } else if (cardType === 'extra') {
     inner = buildSection('', rules, false);
   } else {
