@@ -2,12 +2,13 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HEAD,HDLG Заправки">
 <meta name="theme-color" content="#1c6e56">
+<meta name="color-scheme" content="light">
 <title>Инструкция по заправкам</title>
 
 <!-- ИКОНКА В СТРОКЕ БРАУЗЕРА. При замене favicon.png меняй и ?v=,
@@ -31,83 +32,171 @@
 <meta property="og:image:height" content="630">
 
 <style>
+  :root {
+    --teal: #1c6e56; --teal-deep: #145c46;
+    --navy: #10233d;
+    --amber: #f2a93b; --amber-deep: #c9720a;
+    --route: #22d3ee; --route-deep: #0e7490;
+    --blue: #2f6fed; --blue-deep: #1d4e89;
+    --violet: #8b5cf6; --violet-deep: #6d28d9;
+    --green: #22c55e; --green-deep: #15803d;
+  }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
-    margin: 0; padding: 16px 14px 40px;
-    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    background: #f4f3ef; color: #1f1f1d;
+    max-width: 480px; margin: 0 auto; padding: 16px 14px 40px;
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background:
+      radial-gradient(480px circle at 15% 15%, rgba(28,110,86,.10), transparent 60%),
+      radial-gradient(420px circle at 90% 30%, rgba(242,169,59,.08), transparent 60%),
+      #f4f3ef;
+    background-attachment: fixed;
+    color: #1f1f1d;
   }
-  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-  .header h1 { font-size: 18px; font-weight: 600; margin: 0; }
-  .header p { font-size: 13px; color: #6b6a65; margin: 4px 0 0; }
+  .header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin: -16px -14px 18px; padding: 18px 14px 20px;
+    padding-top: max(18px, env(safe-area-inset-top) + 10px);
+    background:
+      radial-gradient(circle at 85% -15%, rgba(242,169,59,.38), transparent 55%),
+      radial-gradient(circle at 10% 120%, rgba(47,111,237,.18), transparent 50%),
+      linear-gradient(135deg, var(--teal) 0%, var(--teal-deep) 35%, var(--navy) 100%);
+    border-radius: 0 0 22px 22px;
+    color: #fff;
+  }
+  .header h1 { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  .header p { font-size: 12.5px; font-weight: 500; color: rgba(255,255,255,.82); margin: 4px 0 0; }
   .badge {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: #fbeae7; display:flex; align-items:center; justify-content:center;
-    font-size: 18px; flex-shrink: 0;
+    width: 42px; height: 42px; border-radius: 50%;
+    background: rgba(255,255,255,.12);
+    box-shadow: 0 0 0 2px rgba(255,255,255,.35), 0 2px 6px rgba(0,0,0,.25);
+    display:flex; align-items:center; justify-content:center;
+    overflow: hidden; flex-shrink: 0;
   }
+  .badge img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .banner {
-    background: #fbeae7; color: #712b13; border-radius: 10px;
-    padding: 10px 12px; font-size: 13px; margin-bottom: 16px;
+    background: rgba(255,250,240,.75);
+    border: 1px solid rgba(255,255,255,.6);
+    border-left: 4px solid var(--amber);
+    border-radius: 16px; color: #7a4a06;
+    padding: 12px 14px; font-size: 13px; margin-bottom: 16px;
+    box-shadow: 0 4px 16px rgba(20,30,25,.07), 0 14px 26px -12px rgba(242,169,59,.4);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   }
   .card {
-    background: #ffffff; border: 1px solid #e4e2d9; border-radius: 12px;
-    margin-bottom: 8px; overflow: hidden;
+    --glow: rgba(34,211,238,.5);
+    background: rgba(255,255,255,.94);
+    border: 1px solid rgba(255,255,255,.6);
+    border-left: 4px solid var(--route);
+    border-radius: 16px;
+    margin-bottom: 10px; overflow: hidden;
+    box-shadow: 0 4px 16px rgba(20,30,25,.07), 0 14px 26px -12px var(--glow);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    transition: box-shadow .2s ease;
   }
-  .card.extra {
-    background: #fff8e6; border-color: #f0d38a;
-  }
-  .card.diesel {
-    background: #f0fdf4; border-color: #bbf7d0;
-  }
-  .card.adblue {
-    background: #eaf3fb; border-color: #bcdcf5;
-  }
+  .card.extra  { --glow: rgba(242,169,59,.5); background: rgba(255,250,240,.75); border-left-color: var(--amber); }
+  .card.diesel { --glow: rgba(28,110,86,.5);  background: rgba(241,248,245,.75); border-left-color: var(--teal);  }
+  .card.adblue { --glow: rgba(47,111,237,.5); background: rgba(238,244,251,.75); border-left-color: var(--blue); margin-bottom: 22px; }
+  .card.group-baltics { --glow: rgba(139,92,246,.5); border-left-color: var(--violet); }
+  .card.group-europe  { --glow: rgba(34,197,94,.5); border-left-color: var(--green); }
+  .card.group-adblue  { --glow: rgba(47,111,237,.5);  border-left-color: var(--blue); }
+  .card.open { box-shadow: 0 6px 20px rgba(20,30,25,.10), 0 20px 34px -10px var(--glow); }
   .card-head {
-    width: 100%; display: flex; align-items: center; gap: 10px;
-    padding: 12px 14px; background: transparent; border: none; text-align: left;
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 13px 16px; background: transparent; border: none; text-align: left;
     cursor: pointer; font: inherit; color: inherit;
   }
+  .card-head:active { background: rgba(0,0,0,.035); }
+  .card-head:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
   .num {
-    width: 32px; height: 32px; border-radius: 50%; background: #e6f1fb;
-    color: #0c447c; display:flex; align-items:center; justify-content:center;
-    font-size: 13px; font-weight: 600; flex-shrink: 0;
+    width: 36px; height: 36px; border-radius: 11px;
+    background: linear-gradient(135deg, var(--route), var(--route-deep));
+    color: #fff; display:flex; align-items:center; justify-content:center;
+    font-size: 14px; font-weight: 700; flex-shrink: 0;
+    overflow: hidden;
   }
-  .num.warn { background: #fbeae7; color: #b3401f; font-size: 16px; }
-  .num.diesel-icon { background: #dcfce7; color: #166534; font-size: 16px; }
-  .num.adblue-icon { background: #cfe6fa; color: #0c447c; font-size: 16px; }
-  
+  .num img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .num.warn { background: linear-gradient(135deg, var(--amber), var(--amber-deep)); }
+  .num.diesel-icon { background: linear-gradient(135deg, var(--teal), var(--teal-deep)); }
+  .num.adblue-icon { background: linear-gradient(135deg, var(--blue), var(--blue-deep)); }
+  .num.group-baltics { background: linear-gradient(135deg, var(--violet), var(--violet-deep)); }
+  .num.group-europe  { background: linear-gradient(135deg, var(--green), var(--green-deep)); }
+  .num.group-adblue  { background: linear-gradient(135deg, var(--blue), var(--blue-deep)); }
+
   .head-text { flex: 1; min-width: 0; }
-  .title { font-size: 14px; font-weight: 600; margin: 0; }
+  .title { font-size: 15px; font-weight: 600; margin: 0; }
   .subtitle {
     font-size: 12px; color: #6b6a65; margin: 2px 0 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .chev { font-size: 14px; color: #9a988f; transition: transform 0.2s; flex-shrink: 0; }
-  .card-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+  .chev { font-size: 14px; color: #a8a498; transition: transform .28s cubic-bezier(.4,0,.2,1), color .2s ease; flex-shrink: 0; }
+  .card-body { max-height: 0; overflow: hidden; transition: max-height .28s cubic-bezier(.4,0,.2,1); }
   .card-body-inner {
-    padding: 0 14px 14px 56px; font-size: 13px; line-height: 1.6;
-    border-top: 1px solid #eeece4; padding-top: 10px; margin-top: 2px;
+    padding: 0 16px 14px 64px; font-size: 13.5px; line-height: 1.65;
+    border-top: 1px solid rgba(34,211,238,.25); padding-top: 10px; margin-top: 2px;
+    overflow-wrap: anywhere;
   }
-  .card.extra .card-body-inner { border-top-color: #f0d38a; }
-  .card.diesel .card-body-inner { border-top-color: #bbf7d0; }
-  .card.adblue .card-body-inner { border-top-color: #bcdcf5; }
-  
-  .card.open .chev { transform: rotate(180deg); }
+  .card.extra .card-body-inner { border-top-color: rgba(242,169,59,.35); }
+  .card.diesel .card-body-inner { border-top-color: rgba(28,110,86,.25); }
+  .card.adblue .card-body-inner { border-top-color: rgba(47,111,237,.25); }
+  .card.group-baltics .card-body-inner { border-top-color: rgba(139,92,246,.25); }
+  .card.group-europe  .card-body-inner { border-top-color: rgba(34,197,94,.25); }
+  .card.group-adblue  .card-body-inner { border-top-color: rgba(47,111,237,.25); }
+  .card-body-inner.price-mode { padding-left: 16px; }
+
+  .card.open .chev { transform: rotate(180deg); color: var(--route-deep); }
+  .card.extra.open  .chev { color: var(--amber-deep); }
+  .card.diesel.open .chev { color: var(--teal-deep); }
+  .card.adblue.open .chev { color: var(--blue-deep); }
+  .card.group-baltics.open .chev { color: var(--violet-deep); }
+  .card.group-europe.open  .chev { color: var(--green-deep); }
+  .card.group-adblue.open  .chev { color: var(--blue-deep); }
   .status { font-size: 13px; color: #6b6a65; padding: 20px 0; text-align: center; }
 
   .section { margin-bottom: 10px; }
   .section:last-child { margin-bottom: 0; }
   .section-label {
-    font-size: 12px; font-weight: 700; margin: 0 0 4px; color: #1f1f1d;
+    font-size: 11px; font-weight: 700; margin: 0 0 4px; color: var(--teal-deep);
+    text-transform: uppercase; letter-spacing: .04em;
   }
-  .section-body { font-size: 13px; line-height: 1.6; }
+  .section-body { font-size: 13.5px; line-height: 1.65; }
 
   .stamp {
-    font-size: 12px; color: #166534; font-weight: 600;
+    font-size: 12px; color: var(--teal-deep); font-weight: 600;
     margin: 0 0 10px; padding: 6px 10px;
-    background: #dcfce7; border-radius: 8px; display: inline-block;
+    background: rgba(28,110,86,.12); border-radius: 8px; display: inline-block;
   }
-  .stamp.adblue { background: #cfe6fa; color: #0c447c; }
+  .stamp.adblue { background: rgba(47,111,237,.12); color: var(--blue-deep); }
+
+  .group-divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 18px 4px 10px; font-size: 12px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--route-deep);
+  }
+  .group-divider::before, .group-divider::after {
+    content: ''; flex: 1; height: 2px; border-radius: 2px;
+    background: currentColor; opacity: .35;
+  }
+  .group-divider.group-baltics { color: var(--violet-deep); }
+  .group-divider.group-europe  { color: var(--green-deep); }
+  .group-divider.group-adblue  { color: var(--blue-deep); }
+
+  .price-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .price-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; }
+  .price-table th, .price-table td { padding: 6px 5px; text-align: left; vertical-align: top; }
+  .price-table td { overflow-wrap: anywhere; }
+  .price-table th:first-child, .price-table td.pt-n {
+    width: 22px; text-align: center; color: #a8a498; font-weight: 400;
+    white-space: nowrap; overflow-wrap: normal;
+  }
+  .price-table th:nth-child(2), .price-table td:nth-child(2) { width: 104px; }
+  .price-table th:last-child, .price-table td:last-child { width: 86px; }
+  .price-table thead th {
+    font-size: 10.5px; font-weight: 700;
+    color: var(--teal-deep); border-bottom: 2px solid rgba(28,110,86,.25); padding-bottom: 6px;
+  }
+  .card.adblue .price-table thead th { color: var(--blue-deep); border-bottom-color: rgba(47,111,237,.25); }
+  .price-table tbody tr:nth-child(odd) { background: rgba(0,0,0,.025); }
+  .price-table tbody td { border-bottom: 1px solid rgba(0,0,0,.04); }
 </style>
 </head>
 <body>
@@ -117,10 +206,10 @@
       <h1>Инструкция по заправкам</h1>
       <p id="dateLine">Цены обновлены: …</p>
     </div>
-    <div class="badge">&#9888;</div>
+    <div class="badge"><img src="favicon.png?v=1" width="40" height="40" alt=""></div>
   </div>
 
-  <div class="banner">Внимание, в инструкции есть изменения. Выберите нужный блок ниже.</div>
+  <div class="banner">Внимание — данные обновляются по рабочим дням с 10:00 до 11:00. Следите за изменениями.</div>
 
   <div id="acc"><div class="status">Загрузка…</div></div>
 
@@ -187,9 +276,54 @@ function buildSection(label, content, isNumbered = false) {
     </div>`;
 }
 
-function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType, stamp = '') {
+// Каждая строка списка цен склеена в таблице формулой в виде
+// "Страна  /  Станция   -   Карта" (2+ пробела вокруг "/" и "-" —
+// это и есть разделитель; внутри названий станций попадаются свои
+// одиночные дефисы вроде "Vitoria-Gasteiz", но там пробелов вокруг
+// дефиса меньше двух, поэтому regex их не путает с разделителем).
+function parsePriceLine(line) {
+  const m = line.match(/^(.*?)\s{2,}\/\s{2,}(.*)\s{2,}-\s{2,}(.*)$/);
+  if (!m) return null;
+  return [m[1].trim(), m[2].trim(), m[3].trim()];
+}
+
+function buildPriceTable(content) {
+  const lines = String(content).split('\n').map(s => s.trim()).filter(Boolean);
+  if (lines.length === 0) return '';
+
+  const header = parsePriceLine(lines[0]);
+  if (!header || lines.length === 1) {
+    // Нет данных (например "Цены пока не загружены.") или формат не совпал.
+    return `<p style="margin:0;"><strong>${escapeHtml(lines[0])}</strong></p>`;
+  }
+
+  const rows = lines.slice(1).map((line, i) => {
+    const parts = parsePriceLine(line);
+    if (!parts) return `<tr><td colspan="4">${escapeHtml(line)}</td></tr>`;
+    const [country, station, card] = parts;
+    return `<tr><td class="pt-n">${i + 1}</td><td>${escapeHtml(country)}</td>`
+         + `<td>${escapeHtml(station)}</td><td>${escapeHtml(card)}</td></tr>`;
+  }).join('');
+
+  return `
+    <div class="price-table-wrap">
+      <table class="price-table">
+        <thead><tr><th></th><th>${escapeHtml(header[0])}</th><th>${escapeHtml(header[1])}</th><th>${escapeHtml(header[2])}</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function buildDividerEl(label, groupClass) {
+  const div = document.createElement('div');
+  div.className = 'group-divider' + (groupClass ? ' ' + groupClass : '');
+  div.textContent = label;
+  return div;
+}
+
+function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType, stamp = '', groupClass = '') {
   const item = document.createElement('div');
-  
+
   if (cardType === 'extra') {
     item.className = 'card extra';
   } else if (cardType === 'diesel') {
@@ -197,16 +331,16 @@ function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType, stamp 
   } else if (cardType === 'adblue') {
     item.className = 'card adblue';
   } else {
-    item.className = 'card';
+    item.className = 'card' + (groupClass ? ' ' + groupClass : '');
   }
 
-  let numHtml = `<div class="num">${n}</div>`;
+  let numHtml = `<div class="num${groupClass ? ' ' + groupClass : ''}">${n}</div>`;
   if (cardType === 'extra') {
-    numHtml = `<div class="num warn">&#9888;</div>`;
+    numHtml = `<div class="num warn"><img src="pravila_icon.png" alt=""></div>`;
   } else if (cardType === 'diesel') {
-    numHtml = `<div class="num diesel-icon">⛽</div>`;
+    numHtml = `<div class="num diesel-icon"><img src="diesel_icon.png" alt=""></div>`;
   } else if (cardType === 'adblue') {
-    numHtml = `<div class="num adblue-icon">💧</div>`;
+    numHtml = `<div class="num adblue-icon"><img src="adblue_icon.png" alt=""></div>`;
   }
 
   const btn = document.createElement('button');
@@ -223,10 +357,12 @@ function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType, stamp 
   bodyEl.className = 'card-body';
 
   let inner = '';
+  let innerClass = 'card-body-inner';
   if (cardType === 'diesel' || cardType === 'adblue') {
     const stampClass = cardType === 'adblue' ? 'stamp adblue' : 'stamp';
     const stampHtml = stamp ? `<p class="${stampClass}">Актуально на: ${escapeHtml(stamp)}</p>` : '';
-    inner = stampHtml + buildSection('', rules, true);
+    inner = stampHtml + buildPriceTable(rules);
+    innerClass += ' price-mode';
   } else if (cardType === 'extra') {
     inner = buildSection('', rules, false);
   } else {
@@ -235,7 +371,7 @@ function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType, stamp 
             buildSection('Доп. правила:', rules, false);
   }
 
-  bodyEl.innerHTML = `<div class="card-body-inner">${inner}</div>`;
+  bodyEl.innerHTML = `<div class="${innerClass}">${inner}</div>`;
 
   btn.onclick = () => {
     const isOpen = item.classList.contains('open');
@@ -293,10 +429,23 @@ async function load() {
 
     const blockRows = parseCsv(blocksText);
     blockRows.shift();
-    
+
+    const GROUP_CLASS = {
+      'Работа по БАЛТИИ': 'group-baltics',
+      'Работа в Европе': 'group-europe',
+      'AdBlue': 'group-adblue',
+    };
+
+    let lastGroup = '';
     blockRows.forEach((r, i) => {
       if (!r[0]) return;
-      acc.appendChild(buildBlockEl(i + 1, r[0], r[1], r[2], r[3], r[4], 'normal'));
+      const group = (r[5] || '').trim();
+      const groupClass = GROUP_CLASS[group] || '';
+      if (group && group !== lastGroup) {
+        acc.appendChild(buildDividerEl(group, groupClass));
+      }
+      lastGroup = group;
+      acc.appendChild(buildBlockEl(i + 1, r[0], r[1], r[2], r[3], r[4], 'normal', '', groupClass));
     });
 
   } catch (e) {
