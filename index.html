@@ -159,6 +159,7 @@
     text-transform: uppercase; letter-spacing: .04em;
   }
   .section-body { font-size: 13.5px; line-height: 1.65; }
+  .section-body a { color: var(--blue-deep); font-weight: 600; text-decoration: underline; word-break: break-word; }
 
   .stamp {
     font-size: 12px; color: var(--teal-deep); font-weight: 600;
@@ -243,25 +244,38 @@ function parseCsv(text) {
   return rows.filter(r => r.length && r.some(c => c !== ''));
 }
 
+// Превращает "голые" ссылки http(s) в тексте блока (из Google Таблицы) в кликабельные
+// <a target="_blank">, чтобы водитель мог открыть их в новой вкладке. Работает поверх
+// уже экранированного HTML (escapeHtml сначала) — экранирование URL с "&" безопасно,
+// браузер сам раскодирует &amp; в href.
+function linkifyEscaped(escapedStr) {
+  return escapedStr.replace(/https?:\/\/[^\s<]+/g, (url) => {
+    let trail = '';
+    const m = url.match(/[).,;:!?]+$/);
+    if (m) { trail = m[0]; url = url.slice(0, -trail.length); }
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>${trail}`;
+  });
+}
+
 function linesToList(str, isNumbered = false) {
   const lines = String(str).split('\n').map(s => s.trim()).filter(Boolean);
   if (lines.length === 0) return '';
 
   if (isNumbered) {
-    const firstLine = escapeHtml(lines[0]);
+    const firstLine = linkifyEscaped(escapeHtml(lines[0]));
     const restLines = lines.slice(1);
 
     let html = `<p style="margin: 0 0 12px 0;"><strong>${firstLine}</strong></p>`;
 
     if (restLines.length > 0) {
       html += '<ol style="margin: 0; padding-left: 24px; list-style-type: decimal;">'
-           + restLines.map(s => `<li>${escapeHtml(s)}</li>`).join('')
+           + restLines.map(s => `<li>${linkifyEscaped(escapeHtml(s))}</li>`).join('')
            + '</ol>';
     }
     return html;
   } else {
-    return '<ul style="margin: 0; padding-left: 16px; list-style-type: disc;">' 
-         + lines.map(s => `<li>${escapeHtml(s)}</li>`).join('') 
+    return '<ul style="margin: 0; padding-left: 16px; list-style-type: disc;">'
+         + lines.map(s => `<li>${linkifyEscaped(escapeHtml(s))}</li>`).join('')
          + '</ul>';
   }
 }
