@@ -261,9 +261,10 @@ function linkifyEscaped(escapedStr) {
   });
 }
 
-// Строка, начинающаяся с одного из этих символов, становится жирным подзаголовком
-// без точки-маркера (символ убирается) — способ отметить "новая тема" внутри ячейки
-// без пустой строки. Пустая строка тоже разрывает абзац (см. buildSegments).
+// Строка, начинающаяся с одного из этих символов, становится жирным подзаголовком —
+// способ отметить "новая тема" внутри ячейки без пустой строки. Сам значок остаётся
+// виден на странице (перед жирным текстом), чтобы, например, 🚨 реально бросался
+// в глаза водителю, а не пропадал. Пустая строка тоже разрывает абзац (buildSegments).
 // Разных значков специально несколько: владелец таблицы может использовать любой
 // на свой вкус в разных местах — все они работают одинаково.
 const HEADING_MARKERS = [
@@ -279,7 +280,7 @@ const HEADING_MARKERS = [
 
 function stripHeadingMarker(line) {
   for (const m of HEADING_MARKERS) {
-    if (line.startsWith(m)) return line.slice(m.length).trim();
+    if (line.startsWith(m)) return { marker: m, text: line.slice(m.length).trim() };
   }
   return null;
 }
@@ -294,10 +295,10 @@ function buildSegments(lines) {
   };
   for (const raw of lines) {
     if (raw === '') { flush(); continue; }
-    const heading = stripHeadingMarker(raw);
-    if (heading !== null) {
+    const match = stripHeadingMarker(raw);
+    if (match) {
       flush();
-      if (heading) segments.push({ type: 'heading', text: heading });
+      if (match.text) segments.push({ type: 'heading', marker: match.marker, text: match.text });
     } else {
       buffer.push(raw);
     }
@@ -313,7 +314,7 @@ function renderSegments(segments, listTag) {
     const spaced = i > 0;
     if (seg.type === 'heading') {
       return `<p style="margin: ${spaced ? 14 : 0}px 0 4px 0; font-weight: 700;">`
-           + linkifyEscaped(escapeHtml(seg.text)) + '</p>';
+           + escapeHtml(seg.marker) + ' ' + linkifyEscaped(escapeHtml(seg.text)) + '</p>';
     }
     return `<${listTag} style="margin: ${spaced ? 10 : 0}px 0 0 0; padding-left: ${padding}px; list-style-type: ${listStyle};">`
          + seg.items.map(s => `<li>${linkifyEscaped(escapeHtml(s))}</li>`).join('')
@@ -328,7 +329,8 @@ function linesToList(str, isNumbered = false) {
   if (isNumbered) {
     const firstIdx = lines.findIndex(l => l !== '');
     if (firstIdx === -1) return '';
-    const firstLine = stripHeadingMarker(lines[firstIdx]) ?? lines[firstIdx];
+    const firstMatch = stripHeadingMarker(lines[firstIdx]);
+    const firstLine = firstMatch ? `${firstMatch.marker} ${firstMatch.text}` : lines[firstIdx];
     titleHtml = `<p style="margin: 0 0 12px 0;"><strong>${linkifyEscaped(escapeHtml(firstLine))}</strong></p>`;
     lines = lines.slice(firstIdx + 1);
   }
