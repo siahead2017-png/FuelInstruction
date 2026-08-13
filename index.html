@@ -261,50 +261,72 @@ function linkifyEscaped(escapedStr) {
   });
 }
 
-// Пустая строка в ячейке таблицы = разрыв абзаца. Строки группируются по пустым
-// строкам-разделителям, каждая группа рисуется своим списком с отступом сверху —
-// иначе все пункты сливались в один сплошной список без видимой границы.
-function groupLines(str) {
-  const rawLines = String(str).split('\n').map(s => s.trim());
-  const groups = [];
-  let current = [];
-  for (const line of rawLines) {
-    if (line === '') {
-      if (current.length) { groups.push(current); current = []; }
-    } else {
-      current.push(line);
-    }
+// Строка, начинающаяся с одного из этих символов, становится жирным подзаголовком
+// без точки-маркера (символ убирается) — способ отметить "новая тема" внутри ячейки
+// без пустой строки. Пустая строка тоже разрывает абзац (см. buildSegments).
+// Разных значков специально несколько: владелец таблицы может использовать любой
+// на свой вкус в разных местах — все они работают одинаково.
+const HEADING_MARKERS = ['#', '>', '~', '*', '★', '✦', '▶', '➤', '📌', '‣'];
+
+function stripHeadingMarker(line) {
+  for (const m of HEADING_MARKERS) {
+    if (line.startsWith(m)) return line.slice(m.length).trim();
   }
-  if (current.length) groups.push(current);
-  return groups;
+  return null;
 }
 
-function renderListGroup(lines, tag, spaced) {
-  const padding = tag === 'ol' ? 24 : 16;
-  const listStyle = tag === 'ol' ? 'decimal' : 'none';
-  const margin = spaced ? '10px 0 0 0' : '0';
-  return `<${tag} style="margin: ${margin}; padding-left: ${padding}px; list-style-type: ${listStyle};">`
-       + lines.map(s => `<li>${linkifyEscaped(escapeHtml(s))}</li>`).join('')
-       + `</${tag}>`;
+// Разбивает текст ячейки на сегменты: списки (ul/ol) и жирные подзаголовки.
+// Пустая строка или строка-маркер разрывают текущий список.
+function buildSegments(lines) {
+  const segments = [];
+  let buffer = [];
+  const flush = () => {
+    if (buffer.length) { segments.push({ type: 'list', items: buffer }); buffer = []; }
+  };
+  for (const raw of lines) {
+    if (raw === '') { flush(); continue; }
+    const heading = stripHeadingMarker(raw);
+    if (heading !== null) {
+      flush();
+      if (heading) segments.push({ type: 'heading', text: heading });
+    } else {
+      buffer.push(raw);
+    }
+  }
+  flush();
+  return segments;
+}
+
+function renderSegments(segments, listTag) {
+  const padding = listTag === 'ol' ? 24 : 16;
+  const listStyle = listTag === 'ol' ? 'decimal' : 'none';
+  return segments.map((seg, i) => {
+    const spaced = i > 0;
+    if (seg.type === 'heading') {
+      return `<p style="margin: ${spaced ? 14 : 0}px 0 4px 0; font-weight: 700;">`
+           + linkifyEscaped(escapeHtml(seg.text)) + '</p>';
+    }
+    return `<${listTag} style="margin: ${spaced ? 10 : 0}px 0 0 0; padding-left: ${padding}px; list-style-type: ${listStyle};">`
+         + seg.items.map(s => `<li>${linkifyEscaped(escapeHtml(s))}</li>`).join('')
+         + `</${listTag}>`;
+  }).join('');
 }
 
 function linesToList(str, isNumbered = false) {
-  const groups = groupLines(str);
-  if (groups.length === 0) return '';
+  let lines = String(str).split('\n').map(s => s.trim());
 
+  let titleHtml = '';
   if (isNumbered) {
-    const firstLine = linkifyEscaped(escapeHtml(groups[0][0]));
-    let html = `<p style="margin: 0 0 12px 0;"><strong>${firstLine}</strong></p>`;
-
-    const restGroups = groups[0].length > 1
-      ? [groups[0].slice(1), ...groups.slice(1)]
-      : groups.slice(1);
-
-    html += restGroups.map((g, i) => renderListGroup(g, 'ol', i > 0)).join('');
-    return html;
-  } else {
-    return groups.map((g, i) => renderListGroup(g, 'ul', i > 0)).join('');
+    const firstIdx = lines.findIndex(l => l !== '');
+    if (firstIdx === -1) return '';
+    const firstLine = stripHeadingMarker(lines[firstIdx]) ?? lines[firstIdx];
+    titleHtml = `<p style="margin: 0 0 12px 0;"><strong>${linkifyEscaped(escapeHtml(firstLine))}</strong></p>`;
+    lines = lines.slice(firstIdx + 1);
   }
+
+  const segments = buildSegments(lines);
+  if (segments.length === 0) return titleHtml;
+  return titleHtml + renderSegments(segments, isNumbered ? 'ol' : 'ul');
 }
 
 function buildSection(label, content, isNumbered = false) {
