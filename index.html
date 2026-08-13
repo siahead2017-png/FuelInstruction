@@ -278,7 +278,7 @@ function linesToList(str, isNumbered = false) {
     }
     return html;
   } else {
-    return '<ul style="margin: 0; padding-left: 16px; list-style-type: disc;">'
+    return '<ul style="margin: 0; padding-left: 16px; list-style-type: none;">'
          + lines.map(s => `<li>${linkifyEscaped(escapeHtml(s))}</li>`).join('')
          + '</ul>';
   }
