@@ -261,26 +261,49 @@ function linkifyEscaped(escapedStr) {
   });
 }
 
+// Пустая строка в ячейке таблицы = разрыв абзаца. Строки группируются по пустым
+// строкам-разделителям, каждая группа рисуется своим списком с отступом сверху —
+// иначе все пункты сливались в один сплошной список без видимой границы.
+function groupLines(str) {
+  const rawLines = String(str).split('\n').map(s => s.trim());
+  const groups = [];
+  let current = [];
+  for (const line of rawLines) {
+    if (line === '') {
+      if (current.length) { groups.push(current); current = []; }
+    } else {
+      current.push(line);
+    }
+  }
+  if (current.length) groups.push(current);
+  return groups;
+}
+
+function renderListGroup(lines, tag, spaced) {
+  const padding = tag === 'ol' ? 24 : 16;
+  const listStyle = tag === 'ol' ? 'decimal' : 'none';
+  const margin = spaced ? '10px 0 0 0' : '0';
+  return `<${tag} style="margin: ${margin}; padding-left: ${padding}px; list-style-type: ${listStyle};">`
+       + lines.map(s => `<li>${linkifyEscaped(escapeHtml(s))}</li>`).join('')
+       + `</${tag}>`;
+}
+
 function linesToList(str, isNumbered = false) {
-  const lines = String(str).split('\n').map(s => s.trim()).filter(Boolean);
-  if (lines.length === 0) return '';
+  const groups = groupLines(str);
+  if (groups.length === 0) return '';
 
   if (isNumbered) {
-    const firstLine = linkifyEscaped(escapeHtml(lines[0]));
-    const restLines = lines.slice(1);
-
+    const firstLine = linkifyEscaped(escapeHtml(groups[0][0]));
     let html = `<p style="margin: 0 0 12px 0;"><strong>${firstLine}</strong></p>`;
 
-    if (restLines.length > 0) {
-      html += '<ol style="margin: 0; padding-left: 24px; list-style-type: decimal;">'
-           + restLines.map(s => `<li>${linkifyEscaped(escapeHtml(s))}</li>`).join('')
-           + '</ol>';
-    }
+    const restGroups = groups[0].length > 1
+      ? [groups[0].slice(1), ...groups.slice(1)]
+      : groups.slice(1);
+
+    html += restGroups.map((g, i) => renderListGroup(g, 'ol', i > 0)).join('');
     return html;
   } else {
-    return '<ul style="margin: 0; padding-left: 16px; list-style-type: none;">'
-         + lines.map(s => `<li>${linkifyEscaped(escapeHtml(s))}</li>`).join('')
-         + '</ul>';
+    return groups.map((g, i) => renderListGroup(g, 'ul', i > 0)).join('');
   }
 }
 
