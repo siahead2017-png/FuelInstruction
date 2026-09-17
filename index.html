@@ -473,7 +473,8 @@ function buildBlockEl(n, title, subtitle, main, reserve, rules, cardType, stamp 
     
     document.querySelectorAll('.card').forEach(c => {
       c.classList.remove('open');
-      c.querySelector('.card-body').style.maxHeight = '0px';
+      const body = c.querySelector('.card-body');
+      if (body) body.style.maxHeight = '0px';
     });
     
     if (!isOpen) {
