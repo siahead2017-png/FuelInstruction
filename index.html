@@ -77,6 +77,15 @@
     overflow: hidden; flex-shrink: 0;
   }
   .badge img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .doc-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 8px; padding: 5px 10px;
+    font-size: 12px; font-weight: 600; color: #fff;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 20px; text-decoration: none;
+  }
+  .doc-link:active { background: rgba(255,255,255,.24); }
   .banner {
     background: rgba(255,250,240,.75);
     border: 1px solid rgba(255,255,255,.6);
@@ -210,6 +219,7 @@
     <div>
       <h1>Инструкция по заправкам</h1>
       <p id="dateLine">Цены обновлены: …</p>
+      <a class="doc-link" href="fuel_cards.pdf" target="_blank" rel="noopener noreferrer">📄 Топливные карты (PDF)</a>
     </div>
     <div class="badge"><img src="favicon.png?v=1" width="40" height="40" alt=""></div>
   </div>
