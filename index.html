@@ -44,6 +44,7 @@
     --blue: #2f6fed; --blue-deep: #1d4e89;
     --violet: #8b5cf6; --violet-deep: #6d28d9;
     --green: #22c55e; --green-deep: #15803d;
+    --indigo: #6366f1; --indigo-deep: #4338ca;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
@@ -77,15 +78,6 @@
     overflow: hidden; flex-shrink: 0;
   }
   .badge img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .doc-link {
-    display: inline-flex; align-items: center; gap: 6px;
-    margin-top: 8px; padding: 5px 10px;
-    font-size: 12px; font-weight: 600; color: #fff;
-    background: rgba(255,255,255,.14);
-    border: 1px solid rgba(255,255,255,.35);
-    border-radius: 20px; text-decoration: none;
-  }
-  .doc-link:active { background: rgba(255,255,255,.24); }
   .banner {
     background: rgba(255,250,240,.75);
     border: 1px solid rgba(255,255,255,.6);
@@ -113,6 +105,15 @@
   .card.group-europe  { --glow: rgba(34,197,94,.5); border-left-color: var(--green); }
   .card.group-adblue  { --glow: rgba(47,111,237,.5);  border-left-color: var(--blue); }
   .card.open { box-shadow: 0 6px 20px rgba(20,30,25,.10), 0 20px 34px -10px var(--glow); }
+  .card.doc-card {
+    --glow: rgba(99,102,241,.55);
+    display: block; text-decoration: none; color: inherit;
+    background: rgba(238,238,253,.8); border-left-color: var(--indigo);
+    margin-bottom: 16px;
+  }
+  .card.doc-card:active { box-shadow: 0 6px 20px rgba(20,30,25,.10), 0 20px 34px -10px var(--glow); }
+  .num.doc-icon { background: linear-gradient(135deg, var(--indigo), var(--indigo-deep)); font-size: 17px; }
+  .doc-card .chev { color: var(--indigo-deep); font-size: 18px; font-weight: 700; }
   .card-head {
     width: 100%; display: flex; align-items: center; gap: 12px;
     padding: 13px 16px; background: transparent; border: none; text-align: left;
@@ -219,12 +220,22 @@
     <div>
       <h1>Инструкция по заправкам</h1>
       <p id="dateLine">Цены обновлены: …</p>
-      <a class="doc-link" href="fuel_cards.pdf" target="_blank" rel="noopener noreferrer">📄 Топливные карты (PDF)</a>
     </div>
     <div class="badge"><img src="favicon.png?v=1" width="40" height="40" alt=""></div>
   </div>
 
   <div class="banner">Внимание — данные обновляются по рабочим дням с 10:00 до 11:00. Следите за изменениями.</div>
+
+  <a class="card doc-card" href="fuel_cards.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="card-head">
+      <div class="num doc-icon">📄</div>
+      <div class="head-text">
+        <p class="title">Топливные карты</p>
+        <p class="subtitle">Открыть PDF-инструкцию</p>
+      </div>
+      <div class="chev">↗</div>
+    </div>
+  </a>
 
   <div id="acc"><div class="status">Загрузка…</div></div>
 
